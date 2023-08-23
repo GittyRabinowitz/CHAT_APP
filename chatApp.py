@@ -7,12 +7,10 @@ app = Flask(__name__)
 
 def checkUserData(username, password):
     flag = False
-    print(USERS)
     with open(USERS) as usersFile:
         users = csv.reader(usersFile,delimiter="\n")
         for user in users:
             name ,passwd = user[0].split(",")
-            print(name + "-------------"+passwd)
             if name == username:
                 flag = True
                 if passwd == password:
@@ -62,7 +60,26 @@ def login():
         userpass = request.form['password']
         return checkUserDataLogIn(username, userpass)
 
+@app.route("/lobby", methods=['GET', 'POST'])
+def lobby():
+     if request.method == 'GET':
+        return render_template("lobby.html")
+     elif request.method == 'POST':
+         room = request.form['new_room']
+         return redirect("/chat/"+room)
 
-     
+@app.route("/chat/<room>", methods=['GET', 'POST'])
+def chat(room):
+     if request.method == 'GET':
+        return "hi " + room
+    #  elif request.method == 'POST':
+
+# @app.route("/chat", methods=['GET', 'POST'])
+# def chat():
+#      if request.method == 'GET':
+#         return "hi"
+#     #  elif request.method == 'POST':
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", debug=True)
