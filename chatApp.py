@@ -1,6 +1,5 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template,redirect, request
 import csv
-# import win32api
 
 USERS = "users.csv"
 
@@ -17,30 +16,53 @@ def checkUserData(username, password):
             if name == username:
                 flag = True
                 if passwd == password:
-                    return render_template("login.html")
+                     return redirect("/login")
+
                 else:
                     return "something went wrong!! check your password..."
-                    # win32api.MessageBox(0, 'check your password...', 'something went wrong!!')
         if not flag:
                         with open(USERS, 'a') as file:
                                file.write(username + "," + password + "\n")
                                file.close()
-                               return render_template("login.html")
+                               return redirect("/login")
 
 
 @app.route("/register", methods=['GET', 'POST'])
-def homePage():
+def register():
     if request.method == 'GET':
         return render_template("register.html")
     elif request.method == 'POST':
         username = request.form['username']
         userpass = request.form['password']
         return checkUserData(username, userpass)
-        
-@app.route("/login", methods=['GET','POST'])
-def loginPage():
-    return "login"
 
-        
+
+
+def checkUserDataLogIn(username, password):
+    flag = False
+    with open(USERS) as usersFile:
+        users = csv.reader(usersFile,delimiter="\n")
+        for user in users:
+            name ,passwd = user[0].split(",")
+            if name == username:
+                flag = True
+                if passwd == password:
+                      return redirect("/lobby")
+                else:
+                    return "something went wrong!! check your password..."
+        if not flag:
+            return redirect("/register")
+             
+@app.route("/login", methods=['GET', 'POST'])
+def login():
+    if request.method == 'GET':
+        return render_template("login.html")
+    elif request.method == 'POST':
+        username = request.form['username']
+        userpass = request.form['password']
+        return checkUserDataLogIn(username, userpass)
+
+
+     
 if __name__ == "__main__":
     app.run(host="0.0.0.0", debug=True)
