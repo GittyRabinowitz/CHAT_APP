@@ -41,9 +41,8 @@ def checkUserRegister(username, password):
                 flag = True
                 if passwd == encodedPassword:
                      return redirect("/login")
-
                 else:
-                    return "something went wrong!! check your password..."
+                    return "something went wrong!! check your password or if you are new note that the username is already exist..."
         if not flag:
                         with open(USERS, 'a') as file:
                                file.write(username + "," + encodedPassword + "\n")
