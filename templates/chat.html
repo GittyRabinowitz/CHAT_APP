@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
   <head>
@@ -13,24 +14,26 @@
         if (room=="") room = "general";
         return "/api/chat/"+room;
       }
-  
+ 
       function updateChat() {
         $.get(room(), function(data) {
           $("#chatbox").text(data);
           window.setTimeout(updateChat, 1500);
         })
       }
-  
+ 
       function sendmessage() {
-        $.post(room(), $("#inform").serialize() );
-      }
-  
+    $.post(room(), $("#inform").serialize(), function() {
+      $("#inform input[name='msg']").val(""); 
+    });
+  }
+ 
       $(document).ready(function() {
         $("#chatbox").text("Loading chat...");
         $("#sendBtn").click(sendmessage)
         window.setTimeout(updateChat, 1500);
       });
-  
+ 
     </script>
     <body>
       <h1>Chat Room: {{ room }}</h1>
@@ -39,8 +42,8 @@
         Message:<input name="msg" type=text>
         <input id="sendBtn" type="button" value="send">
       </form>
-      <pre id="chatbox">Loading...</pre>0.
-      
+      <pre id="chatbox">Loading...</pre>
+     
       <br>
       <br>
       <a href="/lobby">Back to lobby</a>
@@ -49,4 +52,4 @@
       <a href="/logout">logout</a>
 
     </body>
-  </html>
+ 

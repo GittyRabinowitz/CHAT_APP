@@ -1,11 +1,23 @@
-from flask import Flask, render_template,redirect, request
+from flask import Flask, render_template,redirect, request,session
+from flask_session import Session
+import os
+
 import csv
+from datetime import datetime
 
 USERS = "users.csv"
 
 app = Flask(__name__)
+app.config["SESSION_PERMANENT"] = False
+app.config["SESSION_TYPE"] = "filesystem"
+Session(app)
+
+ROOMS_PATH = os.getenv('ROOMS_PATH')
+
 
 def checkUserData(username, password):
+    if username == "" or password == "":
+         return "Both username and password are required."
     flag = False
     with open(USERS) as usersFile:
         users = csv.reader(usersFile,delimiter="\n")
@@ -45,7 +57,7 @@ def checkUserDataLogIn(username, password):
             if name == username:
                 flag = True
                 if passwd == password:
-                      return redirect("/lobby")
+                     return redirect("/lobby")
                 else:
                     return "something went wrong!! check your password..."
         if not flag:
@@ -58,28 +70,60 @@ def login():
     elif request.method == 'POST':
         username = request.form['username']
         userpass = request.form['password']
+        session["username"] = username
         return checkUserDataLogIn(username, userpass)
 
 @app.route("/lobby", methods=['GET', 'POST'])
 def lobby():
-     if request.method == 'GET':
-        return render_template("lobby.html")
-     elif request.method == 'POST':
-         room = request.form['new_room']
-         return redirect("/chat/"+room)
+    if not session.get("username"):
+        return redirect("/")
+    with open(f'{ROOMS_PATH}rooms.txt', "r") as file:
+         rooms = [room.strip() for room in file.readlines()]
+         if request.method == 'GET':
+              return render_template("lobby.html",rooms=rooms)
+         elif request.method == 'POST':
+              new_room  = request.form['new_room']
+              if new_room  not in rooms:
+                   with open (f'{ROOMS_PATH}rooms.txt',"a") as file:
+                        file.write("\n"+ new_room  )
+                   with open(f'{ROOMS_PATH}{new_room }.txt', 'w') as new_room_file:
+                        pass  # This creates an empty file 
+              return redirect("/lobby" )
+         
 
-@app.route("/chat/<room>", methods=['GET', 'POST'])
+@app.route('/chat/<room>', methods=['GET', 'POST'])
 def chat(room):
-     if request.method == 'GET':
-        return "hi " + room
-    #  elif request.method == 'POST':
+    if not session.get("username"):
+         return redirect("/")
+    return render_template('chat.html', room=room)
 
-# @app.route("/chat", methods=['GET', 'POST'])
-# def chat():
-#      if request.method == 'GET':
-#         return "hi"
-#     #  elif request.method == 'POST':
+@app.route('/api/chat/<room>', methods=['GET', 'POST'])
+def update_chat(room):
+     if not session.get("username"):
+          return redirect("/")
+     if request.method == "POST":
+          message = request.form['msg']
 
+          username = session['username']
+          timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+          with open(f'{ROOMS_PATH}{room}.txt', 'a') as file:
+               file.write(f'[{timestamp}] {username}: {message}\n')
+     with open(f'{ROOMS_PATH}{room}.txt', 'r') as file:
+          file.seek(0)
+          all_data = file.read()
+          return all_data
+
+
+@app.route("/", methods=['GET', 'POST'])
+def init():
+    if session.get("username"):
+        return redirect("/lobby")
+    return redirect("/register")
+
+@app.route("/logout", methods=['GET', 'POST'])
+def logout():
+     session["username"] = None
+     return redirect("/login")
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", debug=True)

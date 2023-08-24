@@ -2,7 +2,10 @@
 FROM python:3.8
 
 RUN update-ca-certificates
+#set envaierment to development
+ENV FLASK_ENV development
 
+ENV ROOMS_PATH "rooms/"
 # set the working directory in the container
 WORKDIR /code
 # copy the dependencies file to the working directory
