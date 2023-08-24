@@ -1,7 +1,7 @@
 from flask import Flask, render_template,redirect, request,session
 from flask_session import Session
 import os
-
+import base64
 import csv
 from datetime import datetime
 
@@ -15,27 +15,58 @@ Session(app)
 ROOMS_PATH = os.getenv('ROOMS_PATH')
 
 
-def checkUserData(username, password):
+def encode_with_base64(message):
+     message_bytes = message.encode('ascii')
+     base64_bytes = base64.b64encode(message_bytes)
+     base64_message = base64_bytes.decode('ascii')
+     return base64_message
+
+
+def decode_with_base64(base64_message):
+     base64_bytes = base64_message.encode('ascii')
+     message_bytes = base64.b64decode(base64_bytes)
+     message = message_bytes.decode('ascii')
+     return message
+
+def checkUserRegister(username, password):
     if username == "" or password == "":
          return "Both username and password are required."
     flag = False
+    encodedPassword=encode_with_base64(password)
     with open(USERS) as usersFile:
         users = csv.reader(usersFile,delimiter="\n")
         for user in users:
             name ,passwd = user[0].split(",")
             if name == username:
                 flag = True
-                if passwd == password:
+                if passwd == encodedPassword:
                      return redirect("/login")
 
                 else:
                     return "something went wrong!! check your password..."
         if not flag:
                         with open(USERS, 'a') as file:
-                               file.write(username + "," + password + "\n")
+                               file.write(username + "," + encodedPassword + "\n")
                                file.close()
                                return redirect("/login")
 
+
+
+def checkUserLogIn(username, password):
+    flag = False
+    encodedPassword = encode_with_base64(password)
+    with open(USERS) as usersFile:
+        users = csv.reader(usersFile,delimiter="\n")
+        for user in users:
+            name ,passwd = user[0].split(",")
+            if name == username:
+                flag = True
+                if passwd == encodedPassword:
+                     return redirect("/lobby")
+                else:
+                    return "something went wrong!! check your password..."
+        if not flag:
+            return redirect("/register")
 
 @app.route("/register", methods=['GET', 'POST'])
 def register():
@@ -44,24 +75,10 @@ def register():
     elif request.method == 'POST':
         username = request.form['username']
         userpass = request.form['password']
-        return checkUserData(username, userpass)
+        return checkUserRegister(username, userpass)
 
 
 
-def checkUserDataLogIn(username, password):
-    flag = False
-    with open(USERS) as usersFile:
-        users = csv.reader(usersFile,delimiter="\n")
-        for user in users:
-            name ,passwd = user[0].split(",")
-            if name == username:
-                flag = True
-                if passwd == password:
-                     return redirect("/lobby")
-                else:
-                    return "something went wrong!! check your password..."
-        if not flag:
-            return redirect("/register")
              
 @app.route("/login", methods=['GET', 'POST'])
 def login():
@@ -71,7 +88,7 @@ def login():
         username = request.form['username']
         userpass = request.form['password']
         session["username"] = username
-        return checkUserDataLogIn(username, userpass)
+        return checkUserLogIn(username, userpass)
 
 @app.route("/lobby", methods=['GET', 'POST'])
 def lobby():
