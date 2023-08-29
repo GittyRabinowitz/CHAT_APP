@@ -1,11 +1,15 @@
 # set base image (host OS)
-FROM python:3.8
+FROM python:3.8-slim
 
 RUN update-ca-certificates
 #set envaierment to development
 ENV FLASK_ENV development
 #set envaierment to rooms dir path
 ENV ROOMS_PATH "rooms/"
+ENV CSV_USERS_PATH "users.csv"
+
+
+
 # set the working directory in the container
 WORKDIR /code
 # copy the dependencies file to the working directory

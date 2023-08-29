@@ -9,7 +9,7 @@ app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
 ROOMS_PATH = os.getenv('ROOMS_PATH')
-USERS = "users.csv"
+USERS = os.getenv("CSV_USERS_PATH")
 
 
 def encode_with_base64(message):
