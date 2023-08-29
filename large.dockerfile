@@ -1,7 +1,6 @@
-#Stage 1: build Application
 
 # set base image (host OS)
-FROM python:3.8-slim AS reduce_docker_image
+FROM python:latest
 
 RUN update-ca-certificates
 #set envaierment to development
@@ -21,16 +20,6 @@ RUN pip install --trusted-host pypi.org --trusted-host files.pythonhosted.org -r
 # copy the content of the local src directory to the working directory
 COPY . .
 # command to run on container start
-
-
-#stage 2: reduce docker image size runtime
-FROM reduce_docker_image
-
-# set the working directory in the container
-WORKDIR /code
-
-COPY --from=reduce_docker_image /code /code
-
 
 CMD [ "python", "./chatApp.py" ]
 
