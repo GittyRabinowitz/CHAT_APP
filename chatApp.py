@@ -12,6 +12,7 @@ ROOMS_PATH = os.getenv('ROOMS_PATH')
 USERS = os.getenv("CSV_USERS_PATH")
 
 
+
 def encode_with_base64(message):
      message_bytes = message.encode('ascii')
      base64_bytes = base64.b64encode(message_bytes)
