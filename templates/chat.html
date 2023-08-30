@@ -14,6 +14,11 @@
         if (room=="") room = "general";
         return "/api/chat/"+room;
       }
+
+
+      function clear_messages() {
+        room
+      }
  
       function updateChat() {
         $.get(room(), function(data) {
@@ -46,6 +51,16 @@
      
       <br>
       <br>
+      <form id="clear-form" action="{{ url_for('clear_messages', room={{room}}) }}" method="POST">
+      <button onclick="submitForm()">Clear</button>
+      </form>
+
+      <script>
+        function submitForm() {
+          document.getElementById("clear-form").submit();
+        }
+      </script>
+
       <a href="/lobby">Back to lobby</a>
       <br>
       <br>
