@@ -139,7 +139,7 @@ def read_msgs_in_room(path,room):
 def write_msg_into_room(path,room):
       message, username , timestamp = get_details_for_message()
       with open(f'{path}{room}.txt', 'a') as file:
-               file.write(f'[{timestamp}] {username}: {message}\n')
+               file.write(f'[{timestamp}] {username} : {message}\n')
      
      
 @app.route('/api/chat/<room>', methods=['GET', 'POST'])
@@ -159,7 +159,7 @@ def chat(room):
 @app.route("/logout", methods=['GET', 'POST'])
 def logout():
      session["username"] = None
-     return redirect("/login")
+     return redirect("/register")
 
 @app.route("/", methods=['GET', 'POST'])
 def init():
@@ -167,10 +167,20 @@ def init():
         return redirect("/lobby")
     return redirect("/register")
 
+def get_all_messages_in_room(file):
+     return [msg.strip() for msg in file.readlines()]
 
 @app.route("/api/chat/<room>/clear_messages", methods=['GET', 'POST'])
 def clear_messages(room):
-     open(f'{ROOMS_PATH}{room}.txt', 'w').close()
+     with open(f'{ROOMS_PATH}{room}.txt', 'r') as file:
+          file.seek(0)
+          messages = get_all_messages_in_room(file)
+          with open(f'{ROOMS_PATH}{room}.txt', 'w') as file:
+            file.seek(0)
+            for msg in messages:
+                data = msg.split(" ")
+                if data[2] != session['username']:
+                        file.write(msg+'\n')            
      return redirect("/chat/"+room)
 
 
