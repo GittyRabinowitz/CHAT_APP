@@ -173,5 +173,11 @@ def clear_messages(room):
      open(f'{ROOMS_PATH}{room}.txt', 'w').close()
      return redirect("/chat/"+room)
 
+
+@app.route("/health")
+def health():
+     return "OK",200
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", debug=True)
