@@ -7,3 +7,4 @@ docker build -t mycoolimg:$requestedVersion .
 git tag $requestedVersion $requestedCommitHash
 git push origin $requestedVersion
 
+#test
