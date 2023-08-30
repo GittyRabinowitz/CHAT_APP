@@ -171,7 +171,7 @@ def init():
 @app.route("/api/chat/<room>/clear_messages", methods=['GET', 'POST'])
 def clear_messages(room):
      open(f'{ROOMS_PATH}{room}.txt', 'w').close()
-     return redirect("/api/chat/{room}")
+     return redirect("/chat/"+room)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", debug=True)
