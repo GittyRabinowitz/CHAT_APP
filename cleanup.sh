@@ -1,6 +1,6 @@
 # Stop and remove the container
-docker stop mem-and-cpu-limit-demo
-docker rm mem-and-cpu-limit-demo
+docker stop mychatappcontainer
+docker rm mychatappcontainer
 
 # Remove the image
 docker rmi mychatappimg
