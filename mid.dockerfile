@@ -5,10 +5,22 @@ FROM python:3.8-slim
 RUN update-ca-certificates
 #set envaierment to development
 ENV FLASK_ENV development
-#set envaierment veriable to rooms dir path
-ENV ROOMS_PATH "rooms/"
-#set envaierment veriable to  users file
-ENV CSV_USERS_PATH "users.csv"
+
+# Set the environment variable for room path
+ENV ROOMS_PATH /app/rooms
+
+# Set the environment variable for user path
+ENV USERS_PATH /app/users
+
+# Create directories for rooms and users
+RUN mkdir -p $ROOMS_PATH $USERS_PATH
+
+# Make sure the user running the application has access to these directories
+RUN chown -R 1000:1000 $ROOMS_PATH $USERS_PATH
+
+# Define the volumes
+VOLUME $ROOMS_PATH
+VOLUME $USERS_PATH
 
 # set the working directory in the container
 WORKDIR /code

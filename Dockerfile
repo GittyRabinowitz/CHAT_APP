@@ -7,10 +7,26 @@ FROM python:3.8-slim AS reduce_docker_image
 RUN update-ca-certificates
 #set envaierment to development
 ENV FLASK_ENV development
-#set envaierment variable to rooms dir path
-ENV ROOMS_PATH "rooms/"
-#set envaierment variable to users file
-ENV CSV_USERS_PATH "users.csv"
+
+# Set the environment variable for room path
+ENV ROOMS_PATH /app/rooms
+
+# Set the environment variable for user path
+ENV USERS_PATH /app/users
+
+# Create directories for rooms and users
+RUN mkdir -p $ROOMS_PATH $USERS_PATH
+
+# Make sure the user running the application has access to these directories
+RUN chown -R 1000:1000 $ROOMS_PATH $USERS_PATH
+
+# Create the rooms.txt file in /app/rooms
+RUN touch $ROOMS_PATH/rooms.txt
+
+# Define the volumes
+VOLUME $ROOMS_PATH
+VOLUME $USERS_PATH
+
 
 # set the working directory in the container
 WORKDIR /code

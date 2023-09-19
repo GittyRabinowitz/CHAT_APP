@@ -9,7 +9,9 @@ app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
 ROOMS_PATH = os.getenv('ROOMS_PATH')
-USERS = os.getenv("CSV_USERS_PATH")
+USERS_PATH = os.environ.get('USERS_PATH')
+USERS = os.path.join(USERS_PATH, "users.csv")
+
 
 
 
@@ -106,16 +108,16 @@ def get_all_names_of_rooms(file):
 def create_new_room(rooms,path):
        new_room  = request.form['new_room']
        if new_room  not in rooms:
-           with open (f'{path}rooms.txt',"a") as file:
-              file.write("\n"+ new_room  )
-           with open(f'{path}{new_room }.txt', 'w') as new_room_file:
+           with open (f'{path}/rooms.txt',"a") as file:
+              file.write("\n"+ new_room)
+           with open(f'{path}/{new_room}.txt', 'w') as new_room_file:
               pass  # This creates an empty file 
 
 @app.route("/lobby", methods=['GET', 'POST'])
 def lobby():
     if not session.get("username"):
         return redirect("/")
-    with open(f'{ROOMS_PATH}rooms.txt', "r") as file:
+    with open(f'{ROOMS_PATH}/rooms.txt', "r") as file:
          rooms = get_all_names_of_rooms(file)
          if request.method == 'GET':
               return render_template("lobby.html",rooms=rooms)
@@ -131,14 +133,14 @@ def get_details_for_message():
       return message, username , timestamp
 
 def read_msgs_in_room(path,room):
-      with open(f'{path}{room}.txt', 'r') as file:
+      with open(f'{path}/{room}.txt', 'r') as file:
           file.seek(0)
           all_data = file.read()
           return all_data
 
 def write_msg_into_room(path,room):
       message, username , timestamp = get_details_for_message()
-      with open(f'{path}{room}.txt', 'a') as file:
+      with open(f'{path}/{room}.txt', 'a') as file:
                file.write(f'[{timestamp}] {username} : {message}\n')
      
      
@@ -172,10 +174,10 @@ def get_all_messages_in_room(file):
 
 @app.route("/api/chat/<room>/clear_messages", methods=['GET', 'POST'])
 def clear_messages(room):
-     with open(f'{ROOMS_PATH}{room}.txt', 'r') as file:
+     with open(f'{ROOMS_PATH}/{room}.txt', 'r') as file:
           file.seek(0)
           messages = get_all_messages_in_room(file)
-          with open(f'{ROOMS_PATH}{room}.txt', 'w') as file:
+          with open(f'{ROOMS_PATH}/{room}.txt', 'w') as file:
             file.seek(0)
             for msg in messages:
                 data = msg.split(" ")

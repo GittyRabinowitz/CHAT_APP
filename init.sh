@@ -36,16 +36,7 @@
 
 
 # 10
-#!/bin/bash
-# Prompt the user for version input
-read -p "Enter the version to build and run: " version
-
-docker build -t mychatappimg:${version} -f Dockerfile .
-
-
 # Run the container with volume mounts
-docker run -d -p 5000:5000 \
-  -v chat-app-rooms:/code/rooms \
-  -v chat-app-users:/code/users.csv \
-  --name mychatappcontainer-${version} \
-  mychatappimg:${version}
+docker build -t my-chat-app .
+docker run -p 5000:5000 -v "C:/Users/This_User/Documents/try 19-09/ChatAppProject-python-docker/rooms":/app/rooms -v "C:/Users/This_User/Documents/try 19-09/ChatAppProject-python-docker":/app/users my-chat-app
+
