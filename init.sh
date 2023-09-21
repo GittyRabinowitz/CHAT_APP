@@ -21,7 +21,7 @@
 # docker build -t mycoolimg:$requestedVersion .
 # docker run -p 5000:5000 --name my_container mycoolimg
 
-# זה לא עובד:
+# 8 זה לא עובד:
 # commands for building the bonus.dockerfile
 # docker build -t mychatappimg -f bonus.dockerfile .
 # docker run -p 5000:5000 --name mychatappcontainer mychatappimg
