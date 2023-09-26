@@ -1,13 +1,12 @@
-#!/bin/bash
-
-echo "Docker Containers:"
+# Display containers
+echo "---- Containers ----"
 docker ps -a
-
-echo -e "\nDocker Images:"
+# Display images
+echo "---- Images ----"
 docker images
-
-echo -e "\nDocker Volumes:"
+# Display volumes
+echo "---- Volumes ----"
 docker volume ls
-
-echo -e "\nDocker Networks:"
+# Display networks
+echo "---- Networks ----"
 docker network ls

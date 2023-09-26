@@ -1,2 +1,0 @@
-./delete.sh
-./init.sh
