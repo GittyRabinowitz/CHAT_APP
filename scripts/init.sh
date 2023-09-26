@@ -27,16 +27,27 @@
 # docker run -p 5000:5000 --name mychatappcontainer mychatappimg
 
 
-# 9
-# Modify init.sh that it will get as a user input the version to build and run.
-# read -p "Enter the version to build and run: " requestedVersion
-# docker build -t mychatappimg:$requestedVersion .
-# docker run -p 5000:5000 --name mychatappcontainer mychatappimg:$requestedVersion
-
+# # 9
+# # Modify init.sh that it will get as a user input the version to build and run.
+# version='latest'
+# if [ $# -nq 0 ]; then
+#   # Arguments were passed, so use them
+#     version=$1
+# fi
+# docker build -t my-chat-app:${version} .
+# docker run -p 5000:5000 --name mychatappcontainer my-chat-app:${version}
 
 
 # 10
 # Run the container with volume mounts
-docker build -t my-chat-app .
-docker run -p 5000:5000 -v "C:/Users/This_User/Documents/try 19-09/ChatAppProject-python-docker/rooms":/app/rooms -v "C:/Users/This_User/Documents/try 19-09/ChatAppProject-python-docker":/app/users my-chat-app
+#!/bin/bash
+version='latest'
+if [ $# -ne 0 ]; then
+  # Arguments were passed, so use them
+    version=$1
+fi
+
+
+docker build -t my-chat-app:${version} .
+docker run -p 5000:5000 --name mychatappcontainer -v "C:/Users/This_User/Documents/try 19-09/ChatAppProject-python-docker/rooms":/app/rooms -v "C:/Users/This_User/Documents/try 19-09/ChatAppProject-python-docker":/app/users my-chat-app:${version}
 
