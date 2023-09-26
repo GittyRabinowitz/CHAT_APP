@@ -1,83 +1,91 @@
-#!/bin/bash
 
-# Check if the script was passed any arguments
-if [ $# -eq 0 ]; then
-    # No arguments were passed, so prompt the user for them
-    # Get the version and commit hash from the user
-    echo "Enter the version number: "
-    read version
-    echo "Enter the commit hash: "
-    read commit_hash
-else
-  # Arguments were passed, so use them
-  version=$1
-  commit_hash=$2
-fi
+# # without cloud
+# if [ $# -eq 2 ]
+# then
+# requestedVersion=$1
+# requestedCommitHash=$2
 
-#!/bin/bash
+#     docker build -t  my-chat-app:$requestedVersion .
 
-version="v$version"
-dock_name='Dockerfile'
+#     git tag $requestedVersion $requestedCommitHash
+#     git push origin $requestedVersion
+    
+# else
+#     echo "Not valid arguments"
+# fi
 
-if [ $# -eq 3 ]; then
-    dock_name=$3
-fi
 
-appname="chat-app"
+# working with cloud
+if [ $# -eq 2 ]
+then
+    requestedVersion=$1
+    requestedCommitHash=$2
 
-if docker image inspect "$appname:$version" &> /dev/null; then
-    read -p "Image $appname:$version already exists. Do you want to rebuild it? (y/n): " rebuild
-
-    if [[ "$rebuild" == "y" ]]; then
-        # Delete the existing image
-        docker rmi "$appname:$version"
-
-        # Build the Docker image
-        docker build -t "${appname}:${version}" . -f "${dock_name}"
-    else
-        echo "Using existing image $appname:$version."
-    fi
-else
-    docker build -t "${appname}:${version}" . -f "${dock_name}"
-fi
-
-read -p "Do you want to push the image to Artifact Registry? (y/n): " push_to_registry
-
-if [ "$push_to_registry" = "y" ]; then
-    # Set the impersonation service account
-    gcloud config set auth/impersonate_service_account artifact-admin-sa@grunitech-mid-project.iam.gserviceaccount.com
-
-    # Tag the Docker image for Artifact Registry
-    docker tag "${appname}:${version}" "me-west1-docker.pkg.dev/grunitech-mid-project/miriam-chat-app-images/chat-app:${version}"
-
-    # Push the Docker image to Artifact Registry
-    docker push "me-west1-docker.pkg.dev/grunitech-mid-project/miriam-chat-app-images/chat-app:${version}"
-
-    if [ $? -eq 0 ]; then
-        echo "Image successfully pushed to Artifact Registry."
-    else
-        echo "Error pushing image to Artifact Registry."
+    # If the commit hash does not exist, tell the user and exit the script.
+    if ! git rev-parse --verify "$requestedCommitHash" &>/dev/null; then
+        echo "The commit hash $requestedCommitHash does not exist."
         exit 1
     fi
-else
-    echo "Image not pushed to Artifact Registry."
-fi
 
 
 
-read -p "Do you want to push the tag to GitHub? (y/n): " push_tag
-if [[ "$push_tag" == "y" ]]; then
-    # Tag the image with the commit hash
-    git tag ${version} ${commit_hash}
-    git push origin ${version}
-    # Check if the image was pushed successfully
-    if [ $? -ne 0 ]; then
-        echo "Error pushing image to GitHub"
-        exit 1
-    else
-        # Success!
-        echo "Image pushed to GitHub successfully"
+
+    image="my-chat-app"
+    image_name="${image}:${requestedVersion}"
+
+    # If the image exists, ask the user if they want to rebuild it.
+    if docker inspect "$image_name" &>/dev/null; then
+        echo "The image my-chat-app:$requestedVersion already exists."
+        echo "Do you want to rebuild it? (y/n)"
+        read -r REBUILD_IMAGE
+
+        # If the user chooses to rebuild the image, delete the existing one.
+        if [ "$REBUILD_IMAGE" = "y" ]; then
+            docker rmi my-chat-app:$requestedVersion
+            # Build the image.
+            docker build -t my-chat-app:$requestedVersion .
+        fi
+    else 
+        docker build -t my-chat-app:$requestedVersion .
+
     fi
+
+    # Ask the user if they want to tag and push to git.
+    echo "Do you want to tag and push the new version to git? (y/n)"
+    read -r TAG_AND_PUSH
+
+
+    # Tag and push the new version to git.
+    # (This is now optional.)
+    if [ "$TAG_AND_PUSH" = "y" ]; then
+        git tag $requestedVersion $requestedCommitHash
+        git push origin $requestedVersion
+    fi
+
+
+    # Ask the user if they want to push the image to the Artifact Registry repository.
+    echo "Do you want to push the image to the Artifact Registry repository? (y/n)"
+    read -r PUSH_IMAGE
+    
+    # If the user chooses to push the image, do so using service account impersonation.
+    if [ "$PUSH_IMAGE" = "y" ]; then
+
+        appname="chat-app"
+        # Push the Docker image to Artifact Registry (optional)
+        echo "Pushing Docker image to artifactregistry"
+        gcloud config set auth/impersonate_service_account artifact-admin-sa@grunitech-mid-project.iam.gserviceaccount.com  
+        gcloud auth configure-docker me-west1-docker.pkg.dev
+        artifact_registry_image=me-west1-docker.pkg.dev/grunitech-mid-project/gittyrabinowitz-chat-app-images/${appname}:${requestedVersion}
+        docker tag ${image_name} ${artifact_registry_image} 
+        docker push ${artifact_registry_image}
+        gcloud config set auth/impersonate_service_account gitty-instance-SA@grunitech-mid-project.iam.gserviceaccount.com  
+
+    fi
+
+
+
+
+
 else
-    echo "Tag not pushed to GitHub."
+    echo "Not valid arguments"
 fi
