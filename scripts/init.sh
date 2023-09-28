@@ -53,27 +53,20 @@
 
 
 
+# with cloud
+version=$1
 
 
-#!/bin/bash
+gcloud config unset auth/impersonate_service_account
 
-version='latest'
-if [ $# -ne 0 ]; then
-  # Arguments were passed, so use them
-    version=$1
-fi
+gcloud compute ssh gittyrabinowitz1@gitty-first-instance --project grunitech-mid-project --zone me-west1-a
 
-# Get the VM instance IP address
-vm_ip=$(gcloud compute instances list | grep gitty-first-instance | awk '{print $4}')
+gcloud auth configure-docker me-west1-docker.pkg.dev
 
-# Connect to the VM instance via ssh
-ssh gittyrabinowitz1@${vm_ip} << EOF
+docker volume create chat-app-data
 
-# Pull the specified versioned image from the Artifact registry
-docker pull artifactregistry.googleapis.com/Grunitech Mid Project/my-chat-app:${version}
+# docker pull me-west1-docker.pkg.dev/grunitech-mid-project/gittyrabinowitz-chat-app-images/chat-app:22.0.0
+docker pull me-west1-docker.pkg.dev/grunitech-mid-project/gittyrabinowitz-chat-app-images/chat-app:${version}
 
-# Run the image
-docker run -p 5000:5000 --name mychatappcontainer -v "C:/Users/This_User/Documents/try 19-09/ChatAppProject-python-docker/rooms":/app/rooms -v "C:/Users/This_User/Documents/try 19-09/ChatAppProject-python-docker":/app/users artifactregistry.googleapis.com/my-project/my-chat-app:${version}
-
-EOF
-
+# docker run -p 80:5000 me-west1-docker.pkg.dev/grunitech-mid-project/gittyrabinowitz-chat-app-images/chat-app:22.0.0
+docker run -p 80:5000 me-west1-docker.pkg.dev/grunitech-mid-project/gittyrabinowitz-chat-app-images/chat-app:${version}

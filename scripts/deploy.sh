@@ -76,7 +76,7 @@ then
         gcloud config set auth/impersonate_service_account artifact-admin-sa@grunitech-mid-project.iam.gserviceaccount.com  
         gcloud auth configure-docker me-west1-docker.pkg.dev
         artifact_registry_image=me-west1-docker.pkg.dev/grunitech-mid-project/gittyrabinowitz-chat-app-images/${appname}:${requestedVersion}
-        docker tag ${image_name} ${artifact_registry_image} 
+        docker tag ${image_name} ${artifact_registry_image}
         docker push ${artifact_registry_image}
         gcloud config set auth/impersonate_service_account gitty-instance-SA@grunitech-mid-project.iam.gserviceaccount.com  
 
